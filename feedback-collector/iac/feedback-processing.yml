@@ -50,7 +50,7 @@ Resources:
     Properties:
       FunctionName: lambda2_sentiment_analyzer
       Runtime: python3.12
-      Handler: lambda_function.lambda_handler
+      Handler: index.lambda_handler
       Role: !GetAtt Lambda2ExecutionRole.Arn
       Timeout: 10
       Code:

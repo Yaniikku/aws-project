@@ -18,7 +18,6 @@ Resources:
   Lambda2ExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: lambda2-feedback-role
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:

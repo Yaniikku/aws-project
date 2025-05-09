@@ -1,0 +1,81 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Feedback Verarbeitung mit DynamoDB, Lambda und IAM
+
+Resources:
+
+  FeedbackTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: FeedbackTable
+      AttributeDefinitions:
+        - AttributeName: timestamp
+          AttributeType: S
+      KeySchema:
+        - AttributeName: timestamp
+          KeyType: HASH
+      BillingMode: PAYPERREQUEST
+
+  Lambda2ExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: lambda2-feedback-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: Lambda2InlinePolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - comprehend:DetectSentiment
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+
+  Lambda2SentimentFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: lambda2_sentiment_analyzer
+      Runtime: python3.12
+      Handler: lambda_function.lambda_handler
+      Role: !GetAtt Lambda2ExecutionRole.Arn
+      Timeout: 10
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import os
+
+          comprehend = boto3.client('comprehend')
+          dynamodb = boto3.resource('dynamodb')
+          table = dynamodb.Table('FeedbackTable')
+
+          def lambda_handler(event, context):
+              for record in event['Records']:
+                  payload = json.loads(record['Sns']['Message'])
+                  sentiment = comprehend.detect_sentiment(
+                      Text=payload['feedback'],
+                      LanguageCode='de'
+                  )
+                  payload['sentiment'] = sentiment['Sentiment']
+                  table.put_item(Item=payload)
+
+Outputs:
+  TableName:
+    Value: !Ref FeedbackTable
+  LambdaFunction:
+    Value: !Ref Lambda2SentimentFunction

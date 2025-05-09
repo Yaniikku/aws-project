@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Feedback Collector</title>
+</head>
+<body>
+  <h1>Feedback</h1>
+  <form id="feedbackForm">
+    <input type="text" id="name" placeholder="Name" required><br>
+    <textarea id="feedback" placeholder="Your feedback" required></textarea><br>
+    <button type="submit">Submit</button>
+  </form>
+  <p id="status"></p>
+
+  <script>
+    document.getElementById("feedbackForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const res = await fetch("https://<API_GATEWAY_URL>/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: document.getElementById("name").value,
+          feedback: document.getElementById("feedback").value
+        })
+      });
+      const data = await res.json();
+      document.getElementById("status").innerText = data.message;
+    });
+  </script>
+</body>
+</html>

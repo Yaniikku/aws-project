@@ -3,8 +3,5 @@ version: 0.2
 phases:
   build:
     commands:
-      - echo "Deploying CloudFormation template..."
-      - aws cloudformation deploy \
-          --template-file iac/feedback-processing.yml \
-          --stack-name feedback-processing \
-          --capabilities CAPABILITY_NAMED_IAM
+      - echo "Deploying feedback-processing stack..."
+      - aws cloudformation deploy --template-file iac/feedback-processing.yml --stack-name feedback-processing --capabilities CAPABILITY_NAMED_IAM

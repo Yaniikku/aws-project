@@ -13,7 +13,7 @@ Resources:
       KeySchema:
         - AttributeName: timestamp
           KeyType: HASH
-      BillingMode: PAYPERREQUEST
+      BillingMode: PAY_PER_REQUEST
 
   Lambda2ExecutionRole:
     Type: AWS::IAM::Role
@@ -57,20 +57,19 @@ Resources:
         ZipFile: |
           import json
           import boto3
-          import os
+          import datetime
 
-          comprehend = boto3.client('comprehend')
           dynamodb = boto3.resource('dynamodb')
           table = dynamodb.Table('FeedbackTable')
 
           def lambda_handler(event, context):
               for record in event['Records']:
                   payload = json.loads(record['Sns']['Message'])
-                  sentiment = comprehend.detect_sentiment(
-                      Text=payload['feedback'],
-                      LanguageCode='de'
-                  )
-                  payload['sentiment'] = sentiment['Sentiment']
+                  
+                  # Dummy Sentiment Logik
+                  payload['sentiment'] = 'NEUTRAL'
+                  payload['timestamp'] = datetime.datetime.utcnow().isoformat()
+
                   table.put_item(Item=payload)
 
 Outputs:

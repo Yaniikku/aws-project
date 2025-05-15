@@ -54,30 +54,30 @@ Resources:
       Role: !GetAtt Lambda2ExecutionRole.Arn
       Timeout: 10
       Code:
-      ZipFile: |
-        import json
-        import boto3
-        import datetime
+        ZipFile: |
+          import json
+          import boto3
+          import datetime
 
-        comprehend = boto3.client('comprehend')
-        dynamodb = boto3.resource('dynamodb')
-        table = dynamodb.Table('FeedbackTable')
+          comprehend = boto3.client('comprehend')
+          dynamodb = boto3.resource('dynamodb')
+          table = dynamodb.Table('FeedbackTable')
 
-        def lambda_handler(event, context):
-            for record in event['Records']:
-                payload = json.loads(record['Sns']['Message'])
+          def lambda_handler(event, context):
+              for record in event['Records']:
+                  payload = json.loads(record['Sns']['Message'])
 
-                # Sentiment über Comprehend erkennen
-                response = comprehend.detect_sentiment(
-                    Text=payload['feedback'],
-                    LanguageCode='de'  # oder 'en', falls du englische Texte nutzt
-                )
-                sentiment = response['Sentiment']  # POSITIVE / NEGATIVE / etc.
+                  # Sentiment über Comprehend erkennen
+                  response = comprehend.detect_sentiment(
+                      Text=payload['feedback'],
+                      LanguageCode='de'  # oder 'en', falls du englische Texte nutzt
+                  )
+                  sentiment = response['Sentiment']  # POSITIVE / NEGATIVE / etc.
 
-                payload['sentiment'] = sentiment
-                payload['timestamp'] = datetime.datetime.utcnow().isoformat()
+                  payload['sentiment'] = sentiment
+                  payload['timestamp'] = datetime.datetime.utcnow().isoformat()
 
-                table.put_item(Item=payload)
+                  table.put_item(Item=payload)
 
 
 Outputs:

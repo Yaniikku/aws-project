@@ -1,31 +1,96 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Feedback Collector</title>
+  <title>Feedback</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+      color: #333;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    p {
+      margin-top: 0;
+      margin-bottom: 30px;
+      font-size: 1.1em;
+      color: #555;
+    }
+
+    form {
+      background-color: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    input, textarea {
+      font-size: 1em;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      resize: vertical;
+    }
+
+    button {
+      background-color: #007acc;
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 1em;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #005fa3;
+    }
+  </style>
 </head>
 <body>
-  <h1>Feedback</h1>
-  <form id="feedbackForm">
-    <input type="text" id="name" placeholder="Name" required><br>
-    <textarea id="feedback" placeholder="Your feedback" required></textarea><br>
-    <button type="submit">Submit</button>
+  <h1>Gib dein Feedback ab</h1>
+  <p>Gib Feedback zu unserem Cloud-Modul ab. Wir freuen uns über jede Rückmeldung!</p>
+
+  <form id="feedback-form">
+    <input type="text" id="name" placeholder="Dein Name" required>
+    <textarea id="feedback" placeholder="Dein Feedback" rows="5" required></textarea>
+    <button type="submit">Absenden</button>
   </form>
-  <p id="status"></p>
 
   <script>
-    document.getElementById("feedbackForm").addEventListener("submit", async function(e) {
+    const form = document.getElementById('feedback-form');
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const res = await fetch("https://<API_GATEWAY_URL>/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: document.getElementById("name").value,
-          feedback: document.getElementById("feedback").value
-        })
+
+      const name = document.getElementById('name').value;
+      const feedback = document.getElementById('feedback').value;
+
+      const response = await fetch('https://qqzgfh5phh.execute-api.eu-west-1.amazonaws.com/yannick-prod/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, feedback })
       });
-      const data = await res.json();
-      document.getElementById("status").innerText = data.message;
+
+      if (response.ok) {
+        alert("Feedback erfolgreich gesendet!");
+        form.reset();
+      } else {
+        alert("Fehler beim Senden.");
+      }
     });
   </script>
 </body>
